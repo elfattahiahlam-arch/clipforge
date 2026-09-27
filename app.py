@@ -55,6 +55,25 @@ def write_srt(path, segs, clip_start):
             f.write(f"{idx}\n{fmt(st)} --> {fmt(en)}\n{s['text'].strip()}\n\n")
             idx += 1
 
+def download_video(url, dest_path):
+    """Try a few different strategies, since YouTube frequently blocks
+    cloud-server IPs and changes its rules often."""
+    attempts = [
+        ["-f", "mp4/best", "--extractor-args", "youtube:player_client=android,web"],
+        ["-f", "best", "--extractor-args", "youtube:player_client=android"],
+        ["-f", "best"],
+    ]
+    last_error = None
+    for extra_args in attempts:
+        cmd = ["yt-dlp"] + extra_args + ["-o", dest_path, url]
+        try:
+            subprocess.run(cmd, check=True, timeout=900,
+                            capture_output=True, text=True)
+            return
+        except subprocess.CalledProcessError as e:
+            last_error = e.stderr or str(e)
+    raise RuntimeError(last_error or "All download attempts failed.")
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -75,10 +94,10 @@ def clip():
     source_path = os.path.join(job_dir, "source.mp4")
 
     try:
-        subprocess.run(["yt-dlp", "-f", "mp4", "-o", source_path, url], check=True, timeout=900)
+        download_video(url, source_path)
     except Exception as e:
         shutil.rmtree(job_dir, ignore_errors=True)
-        return jsonify({"error": f"Couldn't download that video ({e})."}), 400
+        return jsonify({"error": f"Couldn't download that video. YouTube may be blocking this server right now — try a different video, or try again in a bit. ({e})"}), 400
 
     try:
         model = get_model()
