@@ -4,28 +4,68 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Clipforge — Make clips</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#F2ECDF; --panel:#fff; --text:#16181E; --muted:#5B584E; --accent:#C97A1E; --border:rgba(22,24,30,0.14); }
+  :root {
+    --bg: #F2ECDF; --bg-panel: #FFFFFF; --bg-raised: #E7DFCC;
+    --text: #16181E; --text-muted: #5B584E;
+    --accent: #C97A1E; --border: rgba(22,24,30,0.14);
+  }
   * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--text); font-family:'IBM Plex Sans',sans-serif; padding:40px 20px; }
-  .wrap { max-width: 640px; margin: 0 auto; }
-  h1 { font-family:'Fraunces',serif; font-size: 1.8rem; margin-bottom: 6px; }
-  p.sub { color: var(--muted); margin-top: 0; }
-  form { background: var(--panel); border:1px solid var(--border); border-radius: 12px; padding: 24px; margin-top: 24px; }
-  label { font-size: 0.9rem; color: var(--muted); display:block; margin-bottom: 6px; }
-  input[type=text], select { width:100%; padding: 12px; border-radius: 8px; border:1px solid var(--border); font-size: 1rem; margin-bottom: 16px; }
-  button { background: var(--text); color: var(--bg); border:none; padding: 13px 22px; border-radius: 8px; font-size: 1rem; cursor:pointer; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif; line-height: 1.55; }
+  h1, h2, .display { font-family: 'Fraunces', serif; font-weight: 600; margin: 0; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 56px 24px 80px; }
+
+  .eyebrow { color: var(--accent); font-weight: 500; font-size: 0.9rem; margin-bottom: 10px; }
+  h1 { font-size: clamp(2rem, 4vw, 2.6rem); }
+  p.sub { color: var(--text-muted); margin-top: 12px; font-size: 1.05rem; max-width: 46ch; }
+
+  form { background: var(--bg-panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 26px; margin-top: 28px; }
+  label { font-size: 0.9rem; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  input[type=text], select { width: 100%; padding: 12px; border-radius: 8px;
+    border: 1px solid var(--border); font-size: 1rem; margin-bottom: 18px;
+    font-family: inherit; background: var(--bg); color: var(--text); }
+  button { background: var(--text); color: var(--bg); border: none;
+    padding: 13px 24px; border-radius: 8px; font-size: 1rem; cursor: pointer;
+    font-family: inherit; font-weight: 500; }
+  button:hover { background: var(--accent); color: #1a1400; }
   button:disabled { opacity: 0.6; cursor: default; }
-  #status { margin-top: 16px; font-size: 0.95rem; color: var(--muted); }
-  .clip { margin-top: 20px; }
-  video { width: 100%; max-width: 260px; border-radius: 10px; border:1px solid var(--border); }
+
+  #status { margin-top: 16px; font-size: 0.95rem; color: var(--text-muted); }
+  .clips { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr));
+    gap: 16px; margin-top: 20px; }
+  .clip p { font-size: 0.85rem; color: var(--text-muted); margin: 0 0 6px; }
+  video { width: 100%; border-radius: 10px; border: 1px solid var(--border); }
+
+  section.plans { margin-top: 72px; }
+  .plans-head { margin-bottom: 28px; }
+  .plans-head h2 { font-size: 1.6rem; }
+  .plans-head p { color: var(--text-muted); margin-top: 8px; }
+  .plan-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { background: var(--bg-panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 22px; display: flex; flex-direction: column; }
+  .plan.featured { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .plan-name { font-size: 0.85rem; color: var(--text-muted); }
+  .plan.featured .plan-name { color: var(--accent); }
+  .plan-price { font-family: 'Fraunces', serif; font-size: 1.8rem; margin-top: 8px; }
+  .plan-price span { font-family: 'IBM Plex Sans'; font-size: 0.85rem; font-weight: 400; }
+  .plan ul { list-style: none; padding: 0; margin: 16px 0 20px; font-size: 0.88rem; }
+  .plan li { padding: 5px 0; }
+  .plan a.btn { margin-top: auto; text-align: center; text-decoration: none;
+    padding: 11px; border-radius: 8px; background: var(--accent); color: #1a1400;
+    font-weight: 500; }
+  .plan.featured a.btn { background: var(--accent); }
+  @media (max-width: 640px) { .plan-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="eyebrow">Free while testing</div>
   <h1>Clipforge</h1>
-  <p class="sub">Paste a video link, get short vertical clips with captions.</p>
+  <p class="sub">Paste a video link, get short vertical clips with captions — ready to post to Shorts, Reels, or TikTok.</p>
 
   <form id="clipForm">
     <label for="url">Video link</label>
@@ -41,7 +81,51 @@
   </form>
 
   <div id="status"></div>
-  <div id="results"></div>
+  <div class="clips" id="results"></div>
+
+  <!--
+    PRICING SECTION — connect Stripe Payment Links here.
+    1. Go to dashboard.stripe.com, create a free account.
+    2. Go to "Payment Links" -> create one for $10/month (Creator) and one for $15/month (Studio).
+    3. Copy each link and paste it into the href="" spots below, replacing PASTE_CREATOR_LINK_HERE and PASTE_STUDIO_LINK_HERE.
+  -->
+  <section class="plans">
+    <div class="plans-head">
+      <h2>Plans</h2>
+      <p>Free to try. Upgrade for more videos per month.</p>
+    </div>
+    <div class="plan-grid">
+      <div class="plan">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">$0<span>/month</span></div>
+        <ul>
+          <li>1 video per month</li>
+          <li>3 clips per video</li>
+        </ul>
+        <a class="btn" href="#clipForm" style="background:var(--bg-raised); color:var(--text);">Use it free</a>
+      </div>
+      <div class="plan featured">
+        <div class="plan-name">Creator</div>
+        <div class="plan-price">$10<span>/month</span></div>
+        <ul>
+          <li>10 videos per month</li>
+          <li>10 clips per video</li>
+          <li>No watermark</li>
+        </ul>
+        <a class="btn" href="PASTE_CREATOR_LINK_HERE">Upgrade</a>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Studio</div>
+        <div class="plan-price">$15<span>/month</span></div>
+        <ul>
+          <li>30 videos per month</li>
+          <li>20 clips per video</li>
+          <li>Priority processing</li>
+        </ul>
+        <a class="btn" href="PASTE_STUDIO_LINK_HERE">Upgrade</a>
+      </div>
+    </div>
+  </section>
 </div>
 
 <script>
