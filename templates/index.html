@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clipforge — Make clips</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#F2ECDF; --panel:#fff; --text:#16181E; --muted:#5B584E; --accent:#C97A1E; --border:rgba(22,24,30,0.14); }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:'IBM Plex Sans',sans-serif; padding:40px 20px; }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  h1 { font-family:'Fraunces',serif; font-size: 1.8rem; margin-bottom: 6px; }
+  p.sub { color: var(--muted); margin-top: 0; }
+  form { background: var(--panel); border:1px solid var(--border); border-radius: 12px; padding: 24px; margin-top: 24px; }
+  label { font-size: 0.9rem; color: var(--muted); display:block; margin-bottom: 6px; }
+  input[type=text], select { width:100%; padding: 12px; border-radius: 8px; border:1px solid var(--border); font-size: 1rem; margin-bottom: 16px; }
+  button { background: var(--text); color: var(--bg); border:none; padding: 13px 22px; border-radius: 8px; font-size: 1rem; cursor:pointer; }
+  button:disabled { opacity: 0.6; cursor: default; }
+  #status { margin-top: 16px; font-size: 0.95rem; color: var(--muted); }
+  .clip { margin-top: 20px; }
+  video { width: 100%; max-width: 260px; border-radius: 10px; border:1px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Clipforge</h1>
+  <p class="sub">Paste a video link, get short vertical clips with captions.</p>
+
+  <form id="clipForm">
+    <label for="url">Video link</label>
+    <input type="text" id="url" name="url" placeholder="https://www.youtube.com/watch?v=..." required>
+
+    <label for="num_clips">Number of clips</label>
+    <select id="num_clips" name="num_clips">
+      <option value="3">3</option>
+      <option value="5">5</option>
+    </select>
+
+    <button type="submit" id="submitBtn">Make clips</button>
+  </form>
+
+  <div id="status"></div>
+  <div id="results"></div>
+</div>
+
+<script>
+const form = document.getElementById("clipForm");
+const status = document.getElementById("status");
+const results = document.getElementById("results");
+const submitBtn = document.getElementById("submitBtn");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  results.innerHTML = "";
+  submitBtn.disabled = true;
+  status.textContent = "Working on it — this can take a few minutes...";
+
+  try {
+    const res = await fetch("/clip", { method: "POST", body: new FormData(form) });
+    const data = await res.json();
+    if (data.error) {
+      status.textContent = data.error;
+    } else {
+      status.textContent = "Done. Right-click a clip to save it.";
+      data.clips.forEach((url, i) => {
+        const div = document.createElement("div");
+        div.className = "clip";
+        div.innerHTML = `<p>Clip ${i + 1}</p><video src="${url}" controls></video>`;
+        results.appendChild(div);
+      });
+    }
+  } catch (err) {
+    status.textContent = "Something went wrong. Try again.";
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
